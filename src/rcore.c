@@ -841,7 +841,7 @@ void BeginDrawing(void)
 }
 
 // End canvas drawing and swap buffers (double buffering)
-void EndDrawing(void)
+void EndDrawing(bool waitFps)
 {
     rlDrawRenderBatchActive();      // Update and draw internal render batch
 
@@ -891,15 +891,18 @@ void EndDrawing(void)
     CORE.Time.frame = CORE.Time.update + CORE.Time.draw;
 
     // Wait for some milliseconds...
-    if (CORE.Time.frame < CORE.Time.target)
+    if (waitFps)
     {
-        WaitTime(CORE.Time.target - CORE.Time.frame);
+        if (CORE.Time.frame < CORE.Time.target)
+        {
+            WaitTime(CORE.Time.target - CORE.Time.frame);
 
-        CORE.Time.current = GetTime();
-        double waitTime = CORE.Time.current - CORE.Time.previous;
-        CORE.Time.previous = CORE.Time.current;
+            CORE.Time.current = GetTime();
+            double waitTime = CORE.Time.current - CORE.Time.previous;
+            CORE.Time.previous = CORE.Time.current;
 
-        CORE.Time.frame += waitTime;    // Total frame time: update + draw + wait
+            CORE.Time.frame += waitTime;    // Total frame time: update + draw + wait
+        }
     }
 
     PollInputEvents();      // Poll user events (before next frame update)
